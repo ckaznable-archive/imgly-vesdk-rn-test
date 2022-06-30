@@ -59,7 +59,7 @@
 "pesdk_camera_accessibility_viewfinderLabel" = "Viewfinder";
 "pesdk_camera_button_photoRecordingMode" = "PHOTO";
 "pesdk_camera_button_settings" = "Settings";
-"pesdk_camera_button_videoRecordingMode" = "影片";
+"pesdk_camera_button_videoRecordingMode" = "Video";
 "pesdk_camera_text_noPermissionsAlert" = "Permissions to use Camera are required, please change privacy settings.";
 "pesdk_camera_title_noPermissionsAlert" = "No permissions";
 "pesdk_common_accessibility_addButtonLabel" = "Add";
