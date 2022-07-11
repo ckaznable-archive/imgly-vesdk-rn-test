@@ -4,16 +4,19 @@ import { Camera, CameraCaptureError, useCameraDevices, VideoFile } from "react-n
 import { useIsForeground } from "./src/hook/useIsForeground"
 import Video from "react-native-video"
 import { VESDK } from "react-native-videoeditorsdk"
+import ReactNativeBlobUtil from "react-native-blob-util"
 
 export default function() {
   const devices = useCameraDevices()
   const device = devices.back
   const isAppForeground = useIsForeground()
   const camera = useRef(null)
+  const serialization = useRef(null)
 
   const [path, setPath] = useState(null)
   const [isReady, setReady] = useState(false)
   const [isRecoding, setRecoding] = useState(false)
+  const [rawPath, setRawPath] = useState(null)
 
   const isActive = isAppForeground && isReady
 
@@ -34,9 +37,18 @@ export default function() {
     })
   }, [])
 
-  const onRecordingFinished = async (video: VideoFile) => {
-    const obj = await VESDK.openEditor(video.path)
+  const onRecordingFinished = async ({path}: {path: string}, sObj = null) => {
+    setRawPath(path)
+
+    const obj = await VESDK.openEditor(path, {
+      export: {
+        serialization: {
+          enabled: true
+        }
+      }
+    }, sObj)
     setPath(obj.video)
+    serialization.current = obj.serialization
   }
 
   const onRecordingError = (err: CameraCaptureError) => {
@@ -57,6 +69,13 @@ export default function() {
     camera.current?.startRecording({onRecordingFinished, onRecordingError})
   }
 
+  const backToEditor = async () => {
+    if(rawPath) {
+      const sobj = typeof serialization.current === "string" ? JSON.parse(await ReactNativeBlobUtil.fs.readFile(serialization.current)) : null
+      onRecordingFinished({path: rawPath}, sobj)
+    }
+  }
+
   if (!device) return <></>
 
   if(path) {
@@ -74,7 +93,8 @@ export default function() {
           controls={true}
           repeat={true}
         />
-        <TouchableOpacity onPress={()=>setPath(null)} style={{height: 50, width: 50, borderRadius: 50, backgroundColor: isRecoding ? "green" : "red", top: 50, right: "10%", position: "absolute", zIndex: 100 }} />
+        <TouchableOpacity onPress={()=>setPath(null)} style={{height: 50, width: 50, borderRadius: 50, backgroundColor: "red", top: 50, right: "10%", position: "absolute", zIndex: 100 }} />
+        <TouchableOpacity onPress={backToEditor} style={{height: 50, width: 50, borderRadius: 50, backgroundColor: "blue", top: 50, right: "25%", position: "absolute", zIndex: 100 }} />
       </View>
     )
   }
