@@ -5,6 +5,7 @@ import { useIsForeground } from "./src/hook/useIsForeground"
 import Video from "react-native-video"
 import { VESDK } from "react-native-videoeditorsdk"
 import ReactNativeBlobUtil from "react-native-blob-util"
+import { launchImageLibrary } from "react-native-image-picker"
 
 export default function() {
   const devices = useCameraDevices()
@@ -76,6 +77,16 @@ export default function() {
     }
   }
 
+  const pickVideo = () => {
+    launchImageLibrary({
+      mediaType: "video"
+    }, (res) => {
+      if(res.assets && res.assets.length) {
+        onRecordingFinished({path: res.assets[0].uri})
+      }
+    })
+  }
+
   if (!device) return <></>
 
   if(path) {
@@ -110,8 +121,10 @@ export default function() {
         hdr={true}
         video={true}
         audio={true}
+        enableZoomGesture={true}
       />
       <TouchableOpacity onPress={onRecoding} style={{height: 50, width: 50, borderRadius: 50, backgroundColor: isRecoding ? "green" : "red", bottom: 50, left: "45%", position: "absolute", zIndex: 100 }} />
+      <TouchableOpacity onPress={pickVideo} style={{height: 50, width: 50, borderRadius: 50, backgroundColor: "yellow", bottom: 50, left: "15%", position: "absolute", zIndex: 100 }} />
     </View>
   )
 }
